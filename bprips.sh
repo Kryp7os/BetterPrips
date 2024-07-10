@@ -3,26 +3,6 @@
 ############################
 ##  Methods
 ############################
-prefix_to_bit_netmask() {
-    prefix=$1
-    shift=$(( 32 - prefix ))
-
-    bitmask=""
-    for (( i=0; i < 32; i++ )); do
-        num=0
-        if [ $i -lt $prefix ]; then
-            num=1
-        fi
-
-        space=
-        if [ $(( i % 8 )) -eq 0 ]; then
-            space=" ";
-        fi
-
-        bitmask="${bitmask}${space}${num}"
-    done
-    echo $bitmask
-}
 
 expand_cidr() {
     local cidr=$1
@@ -32,7 +12,7 @@ expand_cidr() {
     local -a octets=($ip)
     local bin_ip=""
 
-    for octet in ${octets[@]}; do
+    for octet in "${octets[@]}"; do
         bin_ip+=$(echo "obase=2; $octet" | bc | awk '{printf "%08d", $0}')
     done
 
@@ -68,6 +48,8 @@ while getopts ":f:" opt; do
             while IFS= read -r line; do
                 if echo "$line" | grep -q '/'; then  # Check if the line contains a CIDR notation
                     expand_cidr "$line"
+                else
+                    echo "$line"  # Output the line as is if it's not a CIDR notation
                 fi
             done < "$file"
             ;;
